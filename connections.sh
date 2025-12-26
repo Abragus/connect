@@ -6,8 +6,9 @@ connections=$(cat ~/connect/connections)
 if [ $# -gt 0 ]; then
         search="$*"
         for i in $search; do
-                # Filter the current list of connections by each search term
-                connections=$(echo "$connections" | grep -E -i "$i")
+                # Insert .* between characters to allow for fuzzy matching
+                fuzzy_search=$(echo "$i" | sed 's/./&.*/g')
+                connections=$(echo "$connections" | grep -E -i "$fuzzy_search")
         done
 fi
 
