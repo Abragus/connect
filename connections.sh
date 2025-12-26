@@ -14,18 +14,24 @@ fi
 
 connections=$(echo "$connections" | sort)
 
-if [ $(echo "$connections" | wc -w) -gt 1 ]; then
-        # More than one hit, so user has to choose
-        select connection in $connections; 
-        do
-                echo "$connection"
-                break
-        done
+count=$(echo "$connections" | wc -w)
+if [ $count -gt 1 ]; then
+        # Exactly two hits, and only differ by _lund/_tving suffix, prefer _lund
+        if [ $count -eq 2 ] && [ $(echo "$connections" | awk -F@ '{print $3}' | sed 's/_\(lund\|tving\)$//' | uniq | wc -l) -eq 1 ]; then
+                connection=$(echo "$connections" | grep "_lund")
+        else
+            # More than one hit, so user has to choose
+            select connection in $connections; 
+            do
+                    echo "$connection"
+                    break
+            done
+        fi
         user=$(echo "$connection" | awk -F@ '{ print $1 }')
         host=$(echo "$connection" | awk -F@ '{ print $2 }')
         name=$(echo "$connection" | awk -F@ '{ print $3 }')
         hit="true"
-elif [ $(echo "$connections" | wc -w) -eq 1 ]; then
+elif [ $count -eq 1 ]; then
         # One hit only, no need to choose anything
         user=$(echo "$connections" | awk -F@ '{ print $1 }')
         host=$(echo "$connections" | awk -F@ '{ print $2 }')
