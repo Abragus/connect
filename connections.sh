@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load initial list
-connections=$(cat ~/connect/connections)
+connections=$(cat connections)
 
 if [ $# -gt 0 ]; then
         search="$*"
