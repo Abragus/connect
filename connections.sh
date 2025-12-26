@@ -23,12 +23,13 @@ if [ $(echo "$connections" | wc -w) -gt 1 ]; then
         done
         user=$(echo "$connection" | awk -F@ '{ print $1 }')
         host=$(echo "$connection" | awk -F@ '{ print $2 }')
+        name=$(echo "$connection" | awk -F@ '{ print $3 }')
         hit="true"
 elif [ $(echo "$connections" | wc -w) -eq 1 ]; then
         # One hit only, no need to choose anything
         user=$(echo "$connections" | awk -F@ '{ print $1 }')
         host=$(echo "$connections" | awk -F@ '{ print $2 }')
-        echo "$user@$host"
+        name=$(echo "$connections" | awk -F@ '{ print $3 }')
         hit="true"
 else
         /usr/bin/host $1 >/dev/null
@@ -41,4 +42,14 @@ else
         fi
 fi
 
+# VPN Routing Logic
+# If lundvpn is UP and target name ends in _lund, swap 10.0.1.x for 10.0.2.x
+if [[ "$name" == *"_lund" ]] && ip addr show lundvpn >/dev/null 2>&1; then
+        host=$(echo "$host" | sed 's/^10\.0\.1\./10.0.2./')
+# If tvingvpn is UP and target name ends in _tving, swap 10.0.1.x for 10.0.2.x
+elif [[ "$name" == *"_tving" ]] && ip addr show tvingvpn >/dev/null 2>&1; then
+        host=$(echo "$host" | sed 's/^10\.0\.1\./10.0.2./')
+fi
+
+echo "$user@$host"
 ssh -X $user@$host
