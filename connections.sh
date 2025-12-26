@@ -42,10 +42,5 @@ else
         fi
 fi
 
-if [ "$user" = "root" ]; then
-        rm $tmp
-        ~/connect/ssh.exp $host root
-else
-        rm $tmp
-        ssh -X $user@$host
-fi
+rm $tmp
+ssh -X $user@$host
