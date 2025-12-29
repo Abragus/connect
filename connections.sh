@@ -29,16 +29,9 @@ if [ $count -gt 1 ]; then
                 break
             done
         fi
-        user=$(echo "$connection" | awk -F@ '{ print $1 }')
-        host=$(echo "$connection" | awk -F@ '{ print $2 }')
-        name=$(echo "$connection" | awk -F@ '{ print $3 }')
-        hit="true"
 elif [ $count -eq 1 ]; then
         # One hit only, no need to choose anything
-        user=$(echo "$connections" | awk -F@ '{ print $1 }')
-        host=$(echo "$connections" | awk -F@ '{ print $2 }')
-        name=$(echo "$connections" | awk -F@ '{ print $3 }')
-        hit="true"
+        connection="$connections"
 else
         /usr/bin/host $1 >/dev/null
         if [ $? -eq 0 ]; then
@@ -48,6 +41,11 @@ else
                 echo "no hit!"
                 exit 1
         fi
+fi
+
+# If we found a connection, parse it
+if [ -n "$connection" ]; then
+        IFS='@' read -r user host name <<< "$connection"
 fi
 
 # VPN Routing Logic
