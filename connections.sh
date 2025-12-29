@@ -14,7 +14,15 @@ fi
 connections=$(echo "$connections" | sort)
 
 count=$(echo "$connections" | wc -w)
-if [ $count -gt 1 ]; then
+if [ $count -eq 0 ]; then
+        echo "no hit!"
+        exit 1
+fi
+
+if [ $count -eq 1 ]; then
+        # One hit only, no need to choose anything
+        connection="$connections"
+else
         # Exactly two hits, and only differ by _lund/_tving suffix, prefer _lund
         if [ $count -eq 2 ] && [ $(echo "$connections" | awk -F@ '{print $3}' | sed 's/_\(lund\|tving\)$//' | uniq | wc -l) -eq 1 ]; then
                 connection=$(echo "$connections" | grep "_lund")
@@ -28,18 +36,6 @@ if [ $count -gt 1 ]; then
                 fi
                 break
             done
-        fi
-elif [ $count -eq 1 ]; then
-        # One hit only, no need to choose anything
-        connection="$connections"
-else
-        /usr/bin/host $1 >/dev/null
-        if [ $? -eq 0 ]; then
-                ~/connect/ssh.exp $1 root
-                exit 0
-        else
-                echo "no hit!"
-                exit 1
         fi
 fi
 
