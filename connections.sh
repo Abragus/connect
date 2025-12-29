@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load initial list
-connections=$(cat connections)
+connections=$(cat "$(dirname "$(readlink -f "$0")")/connections.txt")
 
 if [ $# -gt 0 ]; then
         search="$*"
@@ -20,10 +20,13 @@ if [ $count -gt 1 ]; then
                 connection=$(echo "$connections" | grep "_lund")
         else
             # More than one hit, so user has to choose
+            COLUMNS=1
             select connection in $connections; 
             do
-                    echo "$connection"
-                    break
+                if [ -z "$connection" ]; then
+                    exit 1
+                fi
+                break
             done
         fi
         user=$(echo "$connection" | awk -F@ '{ print $1 }')
@@ -56,5 +59,5 @@ elif [[ "$name" == *"_tving" ]] && ip addr show tvingvpn >/dev/null 2>&1; then
         host=$(echo "$host" | sed 's/^10\.0\.1\./10.0.2./')
 fi
 
-echo "$user@$host"
-ssh -X $user@$host
+echo "> ssh $user@$host"
+ssh $user@$host
